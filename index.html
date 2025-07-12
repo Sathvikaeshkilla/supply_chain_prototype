@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Walmart Chain Brain - AI Supply Chain Optimization</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        :root {
+            --walmart-blue: #0071ce;
+            --walmart-yellow: #ffc220;
+            --dark-blue: #004c91;
+            --light-gray: #f5f5f5;
+            --dark-gray: #333;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background-color: var(--light-gray);
+            color: var(--dark-gray);
+            overflow-x: hidden;
+        }
+
+        header {
+            background-color: white;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 5%;
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .walmart-logo {
+            height: 40px;
+        }
+
+        .chain-brain-logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--walmart-blue);
+            position: relative;
+        }
+
+        .chain-brain-logo::after {
+            content: "AI";
+            position: absolute;
+            top: -10px;
+            right: -25px;
+            font-size: 0.8rem;
+            background-color: var(--walmart-yellow);
+            color: var(--dark-blue);
+            padding: 2px 5px;
+            border-radius: 3px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--dark-gray);
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: var(--walmart-blue);
+        }
+
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        .hero {
+            background: linear-gradient(135deg, var(--walmart-blue), var(--dark-blue));
+            color: white;
+            padding: 5rem 5%;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            position: relative;
+            z-index: 2;
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            max-width: 800px;
+            margin: 0 auto 2rem;
+            position: relative;
+            z-index: 2;
+        }
+
+        .hero-btn {
+            display: inline-block;
+            background-color: var(--walmart-yellow);
+            color: var(--dark-blue);
+            padding: 0.8rem 2rem;
+            border-radius: 30px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: transform 0.3s, box-shadow 0.3s;
+            position: relative;
+            z-index: 2;
+        }
+
+        .hero-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        #particles-js {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: 1;
+        }
+
+        .modules-section {
+            padding: 5rem 5%;
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        .section-title {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .section-title h2 {
+            font-size: 2.5rem;
+            color: var(--dark-blue);
+            margin-bottom: 1rem;
+        }
+
+        .section-title p {
+            font-size: 1.1rem;
+            color: var(--dark-gray);
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .modules-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .module-card {
+            background-color: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+            position: relative;
+        }
+
+        .module-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+        }
+
+        .module-card-header {
+            background-color: var(--walmart-blue);
+            color: white;
+            padding: 1.5rem;
+        }
+
+        .module-card-header h3 {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .module-card-body {
+            padding: 1.5rem;
+        }
+
+        .module-card-body p {
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+        }
+
+        .module-card-footer {
+            padding: 0 1.5rem 1.5rem;
+        }
+
+        .module-btn {
+            display: inline-block;
+            background-color: var(--walmart-yellow);
+            color: var(--dark-blue);
+            padding: 0.6rem 1.5rem;
+            border-radius: 30px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: background-color 0.3s;
+        }
+
+        .module-btn:hover {
+            background-color: #ffd700;
+        }
+
+        .features-section {
+            padding: 6rem 5%;
+            background-color: var(--light-gray);
+        }
+
+        .features-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .feature-card {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s;
+            text-align: center;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+        }
+
+        .feature-icon {
+            font-size: 2.5rem;
+            color: var(--walmart-blue);
+            margin-bottom: 1.5rem;
+        }
+
+        .feature-icon i {
+            font-size: 2.5rem;
+            color: var(--walmart-blue);
+        }
+
+        .feature-card h3 {
+            color: var(--dark-blue);
+            margin-bottom: 1rem;
+        }
+
+        .feature-card p {
+            color: #666;
+            line-height: 1.6;
+        }
+
+
+
+        footer {
+            background-color: var(--dark-blue);
+            color: white;
+            padding: 4rem 5% 2rem;
+        }
+
+        .footer-container {
+            max-width: 1600px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+        }
+
+        .footer-col h4 {
+            font-size: 1.3rem;
+            margin-bottom: 1.5rem;
+            position: relative;
+            padding-bottom: 0.5rem;
+        }
+
+        .footer-col h4::after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 50px;
+            height: 2px;
+            background-color: var(--walmart-yellow);
+        }
+
+        .footer-col ul {
+            list-style: none;
+        }
+
+        .footer-col ul li {
+            margin-bottom: 0.8rem;
+        }
+
+        .footer-col ul li a {
+            color: #ddd;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .footer-col ul li a:hover {
+            color: var(--walmart-yellow);
+        }
+
+        .footer-bottom {
+            text-align: center;
+            padding-top: 3rem;
+            margin-top: 2rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+
+
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+
+            .mobile-menu-btn {
+                display: block;
+            }
+
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+
+            .section-title h2 {
+                font-size: 2rem;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .hero h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav class="navbar">
+            <div class="logo-container">
+                <img src="https://i.imgur.com/Jgq1XyN.png" alt="Walmart Logo" class="walmart-logo">
+                <span class="chain-brain-logo">Chain Brain</span>
+            </div>
+            <div class="nav-links">
+                <a href="#home">Home</a>
+                <a href="#modules">Modules</a>
+                <a href="weather-demo.html">Weather Forecast</a>
+                <a href="peerswap-demo.html">PeerSwap</a>
+                <a href="llm-stock-assistant.html">LLM Assistant</a>
+                <a href="return-flow-optimization.html">Return Optimization</a>
+                <a href="#contact">Contact</a>
+            </div>
+            <button class="mobile-menu-btn">☰</button>
+        </nav>
+    </header>
+
+    <section class="hero" id="home">
+        <div id="particles-js"></div>
+        <h1>Revolutionizing Supply Chain with AI</h1>
+        <p>Walmart Chain Brain leverages cutting-edge artificial intelligence to optimize inventory management, predict
+            demand, and reduce waste across the entire supply chain ecosystem.</p>
+        <a href="weather-demo.html" class="hero-btn">Try Weather Forecast Demo</a>
+    </section>
+
+    <section class="modules-section" id="modules">
+        <div class="section-title">
+            <h2>Our AI-Powered Modules</h2>
+            <p>Four integrated solutions that work together to create a seamless, intelligent supply chain management
+                system</p>
+        </div>
+
+        <div class="modules-grid">
+            <div class="module-card">
+                <div class="module-card-header">
+                    <h3>Weather-Based Stock Forecasting</h3>
+                    <p>Predict demand spikes using weather data</p>
+                </div>
+                <div class="module-card-body">
+                    <p>Our AI analyzes weather patterns and historical sales data to anticipate demand fluctuations
+                        caused by climate conditions like heatwaves, rain, or cold snaps.</p>
+                    <p>Get automated recommendations for stock adjustments before weather events occur.</p>
+                </div>
+                <div class="module-card-footer">
+                    <a href="weather-demo.html" class="module-btn">View Demo</a>
+                </div>
+            </div>
+
+            <div class="module-card">
+                <div class="module-card-header" style="background-color: #2ecc71;">
+                    <h3>PeerSwap</h3>
+                    <p>Smart store-to-store stock rebalancing</p>
+                </div>
+                <div class="module-card-body">
+                    <p>Eliminate overstock and stockouts by intelligently transferring inventory between nearby stores
+                        based on real-time demand and inventory levels.</p>
+                    <p>Reduces waste and improves product availability.</p>
+                </div>
+                <div class="module-card-footer">
+                    <a href="peerswap-demo.html" class="module-btn" style="background-color: #27ae60;">View Demo</a>
+                </div>
+            </div>
+
+            <div class="module-card">
+                <div class="module-card-header" style="background-color: #e74c3c;">
+                    <h3>LLM Stock Assistant</h3>
+                    <p>Natural language inventory management</p>
+                </div>
+                <div class="module-card-body">
+                    <p>Ask questions about stock levels, risk items, or misplaced products using natural language and
+                        get instant, accurate answers from our AI assistant.</p>
+                    <p>Simplifies inventory management for all staff levels.</p>
+                </div>
+                <div class="module-card-footer">
+                    <a href="llm-stock-assistant.html" class="module-btn" style="background-color: #c0392b;">View Demo</a>
+                </div>
+            </div>
+
+            <div class="module-card">
+                <div class="module-card-header" style="background-color: #9b59b6;">
+                    <h3>Return Flow Optimization</h3>
+                    <p>Smart returns classification & routing</p>
+                </div>
+                <div class="module-card-body">
+                    <p>Automatically classify returned products and route them to resell, discount bins, or disposal
+                        based on condition and expiry data.</p>
+                    <p>Maximizes value recovery from returns while minimizing waste.</p>
+                </div>
+                <div class="module-card-footer">
+                    <a href="return-flow-optimization.html" class="module-btn" style="background-color: #8e44ad;">View Demo</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="features-section">
+        <div class="features-container">
+            <div class="section-title">
+                <h2>Key Benefits</h2>
+                <p>Discover how our AI solutions transform your supply chain operations</p>
+            </div>
+
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <h3>Increased Efficiency</h3>
+                    <p>Reduce manual work and automate decision-making with intelligent algorithms.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-dollar-sign"></i>
+                    </div>
+                    <h3>Cost Savings</h3>
+                    <p>Minimize waste and optimize inventory levels to reduce carrying costs.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-bolt"></i>
+                    </div>
+                    <h3>Real-time Insights</h3>
+                    <p>Get up-to-the-minute data and recommendations for quick action.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <h3>Risk Reduction</h3>
+                    <p>Anticipate and mitigate supply chain disruptions before they occur.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+
+    <footer>
+        <div class="footer-container">
+            <div class="footer-col">
+                <h4>Chain Brain</h4>
+                <p>An AI-powered supply chain optimization platform developed for Walmart to revolutionize inventory
+                    management and reduce waste.</p>
+            </div>
+
+            <div class="footer-col">
+                <h4>Modules</h4>
+                <ul>
+                    <li><a href="weather-demo.html">Weather Forecasting</a></li>
+                    <li><a href="peerswap-demo.html">PeerSwap</a></li>
+                    <li><a href="llm-stock-assistant.html">LLM Assistant</a></li>
+                    <li><a href="return-flow-optimization.html">Return Optimization</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-col">
+                <h4>Resources</h4>
+                <ul>
+                    <li><a href="#">Documentation</a></li>
+                    <li><a href="#">API Reference</a></li>
+                    <li><a href="#">Case Studies</a></li>
+                    <li><a href="#">Research Papers</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-col">
+                <h4>Contact</h4>
+                <ul>
+                    <li><a href="#">Email Us</a></li>
+                    <li><a href="#">Support Portal</a></li>
+                    <li><a href="#">Request Demo</a></li>
+                    <li><a href="#">Partner Program</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <p>&copy; 2023 Walmart Chain Brain. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+    <script>
+        // Particles.js initialization
+        particlesJS("particles-js", {
+            "particles": {
+                "number": {
+                    "value": 80,
+                    "density": {
+                        "enable": true,
+                        "value_area": 800
+                    }
+                },
+                "color": {
+                    "value": "#ffffff"
+                },
+                "shape": {
+                    "type": "circle",
+                    "stroke": {
+                        "width": 0,
+                        "color": "#000000"
+                    },
+                    "polygon": {
+                        "nb_sides": 5
+                    }
+                },
+                "opacity": {
+                    "value": 0.5,
+                    "random": false,
+                    "anim": {
+                        "enable": false,
+                        "speed": 1,
+                        "opacity_min": 0.1,
+                        "sync": false
+                    }
+                },
+                "size": {
+                    "value": 3,
+                    "random": true,
+                    "anim": {
+                        "enable": false,
+                        "speed": 40,
+                        "size_min": 0.1,
+                        "sync": false
+                    }
+                },
+                "line_linked": {
+                    "enable": true,
+                    "distance": 150,
+                    "color": "#ffffff",
+                    "opacity": 0.4,
+                    "width": 1
+                },
+                "move": {
+                    "enable": true,
+                    "speed": 2,
+                    "direction": "none",
+                    "random": false,
+                    "straight": false,
+                    "out_mode": "out",
+                    "bounce": false,
+                    "attract": {
+                        "enable": false,
+                        "rotateX": 600,
+                        "rotateY": 1200
+                    }
+                }
+            },
+            "interactivity": {
+                "detect_on": "canvas",
+                "events": {
+                    "onhover": {
+                        "enable": true,
+                        "mode": "grab"
+                    },
+                    "onclick": {
+                        "enable": true,
+                        "mode": "push"
+                    },
+                    "resize": true
+                },
+                "modes": {
+                    "grab": {
+                        "distance": 140,
+                        "line_linked": {
+                            "opacity": 1
+                        }
+                    },
+                    "bubble": {
+                        "distance": 400,
+                        "size": 40,
+                        "duration": 2,
+                        "opacity": 8,
+                        "speed": 3
+                    },
+                    "repulse": {
+                        "distance": 200,
+                        "duration": 0.4
+                    },
+                    "push": {
+                        "particles_nb": 4
+                    },
+                    "remove": {
+                        "particles_nb": 2
+                    }
+                }
+            },
+            "retina_detect": true
+        });
+
+
+
+        // Mobile menu toggle
+        document.querySelector('.mobile-menu-btn').addEventListener('click', function () {
+            document.querySelector('.nav-links').classList.toggle('show');
+        });
+    </script>
+</body>
+</html> 

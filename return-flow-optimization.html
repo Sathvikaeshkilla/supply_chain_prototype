@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Return Flow Optimization | Walmart Chain Brain</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --walmart-blue: #0071ce;
+            --walmart-yellow: #ffc220;
+            --dark-blue: #004c91;
+            --light-gray: #f5f5f5;
+            --dark-gray: #333;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+        
+        body {
+            background-color: var(--light-gray);
+            color: var(--dark-gray);
+        }
+        
+        header {
+            background-color: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 1rem 5%;
+        }
+        
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 5%;
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+        
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .walmart-logo {
+            height: 40px;
+        }
+        
+        .chain-brain-logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--walmart-blue);
+            position: relative;
+        }
+        
+        .chain-brain-logo::after {
+            content: "AI";
+            position: absolute;
+            top: -10px;
+            right: -25px;
+            font-size: 0.8rem;
+            background-color: var(--walmart-yellow);
+            color: var(--dark-blue);
+            padding: 2px 5px;
+            border-radius: 3px;
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+        }
+        
+        .nav-links a {
+            text-decoration: none;
+            color: var(--dark-gray);
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+        
+        .nav-links a:hover {
+            color: var(--walmart-blue);
+        }
+        
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+        
+        .demo-container {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 5%;
+        }
+        
+        .demo-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+        
+        .demo-header h1 {
+            font-size: 2.5rem;
+            color: var(--dark-blue);
+            margin-bottom: 1rem;
+        }
+        
+        .demo-header p {
+            font-size: 1.1rem;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+        
+        .return-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+        
+        .return-controls {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+        
+        .control-group {
+            margin-bottom: 2rem;
+        }
+        
+        .control-group h3 {
+            margin-bottom: 1rem;
+            color: var(--dark-blue);
+        }
+        
+        .input-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .input-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+        
+        .input-group input, .input-group select {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+        
+        .optimize-btn {
+            background-color: var(--walmart-blue);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: background-color 0.3s;
+            width: 100%;
+        }
+        
+        .optimize-btn:hover {
+            background-color: var(--dark-blue);
+        }
+        
+        .return-visualization {
+            height: 500px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            padding: 1rem;
+        }
+        
+        #return-chart {
+            width: 100%;
+            height: 100%;
+        }
+        
+        .results-section {
+            margin-top: 3rem;
+            background-color: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+        
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+        
+        .result-card {
+            border-left: 4px solid var(--walmart-blue);
+            padding: 1rem;
+            background-color: var(--light-gray);
+        }
+        
+        .result-card h4 {
+            margin-bottom: 0.5rem;
+            color: var(--dark-blue);
+        }
+        
+        .flow-map {
+            background-color: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 5px;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .flow-map h5 {
+            color: var(--walmart-blue);
+            margin-bottom: 0.5rem;
+        }
+        
+        .flow-step {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.5rem;
+            padding: 0.5rem;
+            background-color: white;
+            border-radius: 3px;
+        }
+        
+        .flow-step .step-number {
+            background-color: var(--walmart-blue);
+            color: white;
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: bold;
+            margin-right: 1rem;
+        }
+        
+        .back-btn {
+            display: inline-block;
+            margin-top: 2rem;
+            background-color: var(--walmart-blue);
+            color: white;
+            padding: 0.8rem 2rem;
+            border-radius: 5px;
+            text-decoration: none;
+            transition: background-color 0.3s;
+        }
+        
+        .back-btn:hover {
+            background-color: var(--dark-blue);
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 2rem;
+        }
+        
+        .loading::after {
+            content: '';
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid var(--walmart-blue);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        @media (max-width: 768px) {
+            .nav-links {
+                position: fixed;
+                top: 80px;
+                left: 0;
+                width: 100%;
+                background-color: white;
+                flex-direction: column;
+                align-items: center;
+                padding: 2rem 0;
+                gap: 1.5rem;
+                box-shadow: 0 10px 15px rgba(0,0,0,0.1);
+                transform: translateY(-150%);
+                transition: transform 0.3s ease;
+                z-index: 99;
+            }
+            
+            .nav-links.show {
+                transform: translateY(0);
+            }
+            
+            .mobile-menu-btn {
+                display: block;
+            }
+            
+            .return-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .demo-header h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav class="navbar">
+            <div class="logo-container">
+                <img src="https://i.imgur.com/Jgq1XyN.png" alt="Walmart Logo" class="walmart-logo">
+                <span class="chain-brain-logo">Chain Brain</span>
+            </div>
+            <div class="nav-links">
+                <a href="index.html">Home</a>
+                <a href="weather-demo.html">Weather Forecast</a>
+                <a href="peerswap-demo.html">PeerSwap</a>
+                <a href="llm-stock-assistant.html">LLM Stock Assistant</a>
+                <a href="return-flow-optimization.html">Return Flow</a>
+            </div>
+            <button class="mobile-menu-btn">☰</button>
+        </nav>
+    </header>
+
+    <div class="demo-container">
+        <div class="demo-header">
+            <h1>Return Flow Optimization</h1>
+            <p>AI-powered return process optimization to reduce costs, improve customer satisfaction, and maximize value recovery from returned items.</p>
+        </div>
+
+        <div class="return-grid">
+            <div class="return-controls">
+                <div class="control-group">
+                    <h3>Return Analysis Parameters</h3>
+                    <div class="input-group">
+                        <label for="return-category">Return Category</label>
+                        <select id="return-category">
+                            <option value="electronics">Electronics</option>
+                            <option value="clothing">Clothing & Apparel</option>
+                            <option value="home">Home & Garden</option>
+                            <option value="sports">Sports & Outdoors</option>
+                            <option value="beauty">Beauty & Personal Care</option>
+                            <option value="toys">Toys & Games</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label for="return-reason">Return Reason</label>
+                        <select id="return-reason">
+                            <option value="defective">Defective/Damaged</option>
+                            <option value="wrong-size">Wrong Size/Fit</option>
+                            <option value="not-as-described">Not As Described</option>
+                            <option value="changed-mind">Changed Mind</option>
+                            <option value="duplicate">Duplicate Order</option>
+                            <option value="shipping-damage">Shipping Damage</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label for="return-volume">Monthly Return Volume</label>
+                        <input type="number" id="return-volume" value="1000" min="100" max="10000">
+                    </div>
+                    <div class="input-group">
+                        <label for="optimization-goal">Optimization Goal</label>
+                        <select id="optimization-goal">
+                            <option value="cost-reduction">Cost Reduction</option>
+                            <option value="speed-improvement">Speed Improvement</option>
+                            <option value="value-recovery">Value Recovery</option>
+                            <option value="customer-satisfaction">Customer Satisfaction</option>
+                        </select>
+                    </div>
+                    <button id="optimize-btn" class="optimize-btn">Optimize Return Flow</button>
+                </div>
+            </div>
+
+            <div class="return-visualization">
+                <canvas id="return-chart"></canvas>
+            </div>
+        </div>
+
+        <div class="results-section" id="results-section" style="display: none;">
+            <h3>Optimization Results</h3>
+            <div class="loading" id="loading">
+                Optimizing return flow...
+            </div>
+            <div class="results-grid" id="results-grid">
+                <div class="result-card">
+                    <h4>Cost Savings</h4>
+                    <div id="cost-savings"></div>
+                </div>
+                <div class="result-card">
+                    <h4>Processing Time</h4>
+                    <div id="processing-time"></div>
+                </div>
+                <div class="result-card">
+                    <h4>Value Recovery</h4>
+                    <div id="value-recovery"></div>
+                </div>
+            </div>
+            <div class="flow-map" id="flow-map">
+                <h5>Optimized Return Flow</h5>
+                <div id="flow-steps"></div>
+            </div>
+        </div>
+
+        <a href="index.html" class="back-btn">← Back to Home</a>
+    </div>
+
+    <script>
+        // Initialize chart
+        const ctx = document.getElementById('return-chart').getContext('2d');
+        const returnChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Resell', 'Refurbish', 'Recycle', 'Dispose'],
+                datasets: [{
+                    data: [0, 0, 0, 0],
+                    backgroundColor: [
+                        '#2ecc71',
+                        '#3498db',
+                        '#f39c12',
+                        '#e74c3c'
+                    ],
+                    borderWidth: 2,
+                    borderColor: '#fff'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Return Value Distribution'
+                    },
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
+            }
+        });
+
+        // Sample optimization data
+        const optimizationData = {
+            "electronics": {
+                costSavings: "35% reduction in processing costs through automated sorting",
+                processingTime: "Reduced from 5 days to 2.5 days average",
+                valueRecovery: "78% of returned items successfully resold or refurbished",
+                chartData: [45, 25, 20, 10],
+                flowSteps: [
+                    "Automated defect detection and categorization",
+                    "Priority routing for high-value items",
+                    "Quick refurbishment for minor issues",
+                    "Direct resale for like-new items"
+                ]
+            },
+            "clothing": {
+                costSavings: "28% reduction through improved inspection process",
+                processingTime: "Reduced from 3 days to 1.5 days average",
+                valueRecovery: "85% of clothing items resold or donated",
+                chartData: [60, 15, 20, 5],
+                flowSteps: [
+                    "Visual inspection for damage assessment",
+                    "Size verification and re-tagging",
+                    "Quick cleaning for resale items",
+                    "Donation routing for unsellable items"
+                ]
+            },
+            "home": {
+                costSavings: "42% reduction through bulk processing",
+                processingTime: "Reduced from 4 days to 2 days average",
+                valueRecovery: "72% of home items successfully resold",
+                chartData: [50, 22, 18, 10],
+                flowSteps: [
+                    "Bulk sorting by category and condition",
+                    "Automated quality assessment",
+                    "Batch refurbishment for similar items",
+                    "Efficient resale channel routing"
+                ]
+            },
+            "sports": {
+                costSavings: "31% reduction through specialized handling",
+                processingTime: "Reduced from 3.5 days to 2 days average",
+                valueRecovery: "80% of sports equipment successfully resold",
+                chartData: [55, 20, 15, 10],
+                flowSteps: [
+                    "Equipment functionality testing",
+                    "Safety inspection for sports gear",
+                    "Quick repair for minor damages",
+                    "Specialized resale channels"
+                ]
+            },
+            "beauty": {
+                costSavings: "25% reduction through hygienic processing",
+                processingTime: "Reduced from 2 days to 1 day average",
+                valueRecovery: "65% of beauty items successfully resold",
+                chartData: [40, 25, 25, 10],
+                flowSteps: [
+                    "Hygiene and safety inspection",
+                    "Seal integrity verification",
+                    "Sanitization for resale items",
+                    "Proper disposal for opened items"
+                ]
+            },
+            "toys": {
+                costSavings: "38% reduction through age-appropriate sorting",
+                processingTime: "Reduced from 2.5 days to 1.5 days average",
+                valueRecovery: "88% of toys successfully resold or donated",
+                chartData: [65, 15, 15, 5],
+                flowSteps: [
+                    "Age-appropriate categorization",
+                    "Safety standard verification",
+                    "Quick cleaning and sanitization",
+                    "Donation routing for educational value"
+                ]
+            }
+        };
+
+        // Optimize button handler
+        document.getElementById('optimize-btn').addEventListener('click', function() {
+            const category = document.getElementById('return-category').value;
+            const reason = document.getElementById('return-reason').value;
+            const volume = document.getElementById('return-volume').value;
+            const goal = document.getElementById('optimization-goal').value;
+
+            // Show loading
+            document.getElementById('results-section').style.display = 'block';
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('results-grid').style.display = 'none';
+
+            // Simulate optimization processing
+            setTimeout(() => {
+                performOptimization(category, reason, volume, goal);
+            }, 2000);
+        });
+
+        function performOptimization(category, reason, volume, goal) {
+            const data = optimizationData[category] || generateRandomOptimization(category);
+            
+            // Update chart
+            returnChart.data.datasets[0].data = data.chartData;
+            returnChart.update();
+
+            // Update results
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('results-grid').style.display = 'grid';
+
+            document.getElementById('cost-savings').innerHTML = `
+                <p><strong>${data.costSavings}</strong></p>
+                <p>Monthly Volume: ${volume} items</p>
+            `;
+
+            document.getElementById('processing-time').innerHTML = `
+                <p><strong>${data.processingTime}</strong></p>
+                <p>Goal: ${goal.replace('-', ' ')}</p>
+            `;
+
+            document.getElementById('value-recovery').innerHTML = `
+                <p><strong>${data.valueRecovery}</strong></p>
+                <p>Category: ${category.charAt(0).toUpperCase() + category.slice(1)}</p>
+            `;
+
+            // Update flow steps
+            const flowStepsDiv = document.getElementById('flow-steps');
+            flowStepsDiv.innerHTML = data.flowSteps.map((step, index) => `
+                <div class="flow-step">
+                    <div class="step-number">${index + 1}</div>
+                    <div>${step}</div>
+                </div>
+            `).join('');
+        }
+
+        function generateRandomOptimization(category) {
+            const savings = [
+                `${Math.floor(Math.random() * 30) + 20}% reduction in processing costs through automated sorting`,
+                `${Math.floor(Math.random() * 25) + 15}% reduction through improved inspection process`,
+                `${Math.floor(Math.random() * 35) + 20}% reduction through bulk processing`,
+                `${Math.floor(Math.random() * 20) + 10}% reduction through specialized handling`
+            ];
+
+            const times = [
+                `Reduced from ${Math.floor(Math.random() * 3) + 3} days to ${Math.floor(Math.random() * 2) + 1} days average`,
+                `Reduced from ${Math.floor(Math.random() * 4) + 2} days to ${Math.floor(Math.random() * 2) + 1} days average`,
+                `Reduced from ${Math.floor(Math.random() * 3) + 2} days to ${Math.floor(Math.random() * 2) + 1} days average`
+            ];
+
+            const recovery = [
+                `${Math.floor(Math.random() * 20) + 70}% of ${category} items successfully resold or refurbished`,
+                `${Math.floor(Math.random() * 25) + 65}% of ${category} items successfully resold`,
+                `${Math.floor(Math.random() * 30) + 60}% of ${category} items successfully resold or donated`
+            ];
+
+            const steps = [
+                "Automated categorization and sorting",
+                "Quality assessment and condition evaluation",
+                "Efficient processing and routing",
+                "Value maximization through multiple channels"
+            ];
+
+            return {
+                costSavings: savings[Math.floor(Math.random() * savings.length)],
+                processingTime: times[Math.floor(Math.random() * times.length)],
+                valueRecovery: recovery[Math.floor(Math.random() * recovery.length)],
+                chartData: [
+                    Math.floor(Math.random() * 30) + 40,
+                    Math.floor(Math.random() * 20) + 15,
+                    Math.floor(Math.random() * 20) + 10,
+                    Math.floor(Math.random() * 10) + 5
+                ],
+                flowSteps: steps
+            };
+        }
+
+        // Mobile menu toggle
+        document.querySelector('.mobile-menu-btn').addEventListener('click', function() {
+            document.querySelector('.nav-links').classList.toggle('show');
+        });
+    </script>
+</body>
+</html> 

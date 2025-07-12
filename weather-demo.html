@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather-Based Stock Forecasting Demo | Walmart Chain Brain</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        :root {
+            --walmart-blue: #0071ce;
+            --walmart-yellow: #ffc220;
+            --dark-blue: #004c91;
+            --light-gray: #f5f5f5;
+            --dark-gray: #333;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+        
+        body {
+            background-color: var(--light-gray);
+            color: var(--dark-gray);
+        }
+        
+        header {
+            background-color: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 1rem 5%;
+        }
+        
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .walmart-logo {
+            height: 40px;
+        }
+        
+        .chain-brain-logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--walmart-blue);
+        }
+        
+        .demo-container {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 5%;
+        }
+        
+        .demo-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+        
+        .demo-header h1 {
+            font-size: 2.5rem;
+            color: var(--dark-blue);
+            margin-bottom: 1rem;
+        }
+        
+        .demo-header p {
+            font-size: 1.1rem;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+        
+        .demo-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+        
+        .weather-controls {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+        
+        .control-group {
+            margin-bottom: 2rem;
+        }
+        
+        .control-group h3 {
+            margin-bottom: 1rem;
+            color: var(--dark-blue);
+        }
+        
+        .location-selector {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .location-selector input {
+            flex: 1;
+            padding: 0.8rem 1rem;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+        
+        .location-selector button {
+            background-color: var(--walmart-blue);
+            color: white;
+            border: none;
+            padding: 0 2rem;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .location-selector button:hover {
+            background-color: var(--dark-blue);
+        }
+        
+        .preset-buttons {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+        
+        .preset-btn {
+            background-color: #eee;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .preset-btn:hover {
+            background-color: var(--walmart-blue);
+            color: white;
+        }
+        
+        .weather-visualization {
+            height: 500px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            padding: 1rem;
+        }
+        
+        #weather-chart {
+            width: 100%;
+            height: 100%;
+        }
+        
+        .results-section {
+            margin-top: 3rem;
+            background-color: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+        
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+        
+        .result-card {
+            border-left: 4px solid var(--walmart-blue);
+            padding: 1rem;
+            background-color: var(--light-gray);
+        }
+        
+        .result-card h4 {
+            margin-bottom: 0.5rem;
+            color: var(--dark-blue);
+        }
+        
+        .back-btn {
+            display: inline-block;
+            margin-top: 2rem;
+            background-color: var(--walmart-blue);
+            color: white;
+            padding: 0.8rem 2rem;
+            border-radius: 5px;
+            text-decoration: none;
+            transition: background-color 0.3s;
+        }
+        
+        .back-btn:hover {
+            background-color: var(--dark-blue);
+        }
+        
+        @media (max-width: 992px) {
+            .demo-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .weather-visualization {
+                height: 400px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo-container">
+            <img src="https://i.imgur.com/Jgq1XyN.png" alt="Walmart Logo" class="walmart-logo">
+            <span class="chain-brain-logo">Chain Brain</span>
+        </div>
+    </header>
+
+    <div class="demo-container">
+        <div class="demo-header">
+            <h1>Weather-Based Stock Forecasting Demo</h1>
+            <p>Experience how our AI predicts demand changes based on weather forecasts and historical sales data</p>
+        </div>
+        
+        <div class="demo-grid">
+            <div class="weather-controls">
+                <div class="control-group">
+                    <h3>Select Location</h3>
+                    <div class="location-selector">
+                        <input type="text" id="demo-location-input" placeholder="Enter city or region">
+                        <button id="demo-analyze-btn">Analyze</button>
+                    </div>
+                    
+                    <h4>Or try these presets:</h4>
+                    <div class="preset-buttons">
+                        <button class="preset-btn" data-location="Delhi">Delhi (Monsoon)</button>
+                        <button class="preset-btn" data-location="Austin">Austin (Heatwave)</button>
+                        <button class="preset-btn" data-location="Toronto">Toronto (Snowstorm)</button>
+                        <button class="preset-btn" data-location="Miami">Miami (Hurricane)</button>
+                    </div>
+                </div>
+                
+                <div class="control-group">
+                    <h3>Weather Forecast</h3>
+                    <div id="weather-details">
+                        <p>Select a location to view weather forecast and predicted impact on product demand.</p>
+                    </div>
+                </div>
+                
+                <div class="control-group">
+                    <h3>Time Horizon</h3>
+                    <select id="time-horizon" class="location-selector input">
+                        <option value="3">3 days</option>
+                        <option value="7" selected>7 days</option>
+                        <option value="14">14 days</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="weather-visualization">
+                <canvas id="weather-chart"></canvas>
+            </div>
+        </div>
+        
+        <div class="results-section">
+            <h2>Recommended Stock Adjustments</h2>
+            <p id="results-intro">Analysis will appear here after selecting a location.</p>
+            
+            <div class="results-grid" id="results-grid" style="display: none;">
+                <div class="result-card">
+                    <h4>Increase Stock</h4>
+                    <ul id="increase-items">
+                        <!-- Filled by JavaScript -->
+                    </ul>
+                </div>
+                
+                <div class="result-card">
+                    <h4>Decrease Stock</h4>
+                    <ul id="decrease-items">
+                        <!-- Filled by JavaScript -->
+                    </ul>
+                </div>
+                
+                <div class="result-card">
+                    <h4>Special Recommendations</h4>
+                    <ul id="special-items">
+                        <!-- Filled by JavaScript -->
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <a href="index.html" class="back-btn">← Back to Main Page</a>
+    </div>
+
+    <script>
+        // Chart initialization
+        const ctx = document.getElementById('weather-chart').getContext('2d');
+        const weatherChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: [],
+                datasets: [{
+                    label: 'Demand Change (%)',
+                    data: [],
+                    backgroundColor: 'rgba(0, 113, 206, 0.7)',
+                    borderColor: 'rgba(0, 113, 206, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: false,
+                        title: {
+                            display: true,
+                            text: 'Demand Change (%)'
+                        }
+                    }
+                },
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Predicted Demand Changes',
+                        font: {
+                            size: 16
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return `${context.parsed.y > 0 ? '+' : ''}${context.parsed.y}%`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // Sample data for different locations
+        const locationData = {
+            "Delhi": {
+                weather: "Heavy monsoon rains expected for next 7 days",
+                increase: [
+                    { name: "Umbrellas & Raincoats", change: "+45%" },
+                    { name: "Instant Noodles", change: "+38%" },
+                    { name: "Waterproof Footwear", change: "+32%" }
+                ],
+                decrease: [
+                    { name: "Outdoor Furniture", change: "-25%" },
+                    { name: "Summer Clothing", change: "-18%" }
+                ],
+                special: [
+                    { name: "Emergency Kits", note: "Consider promotional display" },
+                    { name: "Mosquito Repellents", note: "Expected 50% demand increase" }
+                ],
+                chartData: {
+                    labels: ["Umbrellas", "Noodles", "Footwear", "Emergency Kits", "Outdoor Furniture"],
+                    values: [45, 38, 32, 28, -25]
+                }
+            },
+            "Austin": {
+                weather: "Heatwave warning with temperatures exceeding 40°C",
+                increase: [
+                    { name: "Air Conditioners", change: "+65%" },
+                    { name: "Bottled Water", change: "+55%" },
+                    { name: "Sunscreen", change: "+48%" }
+                ],
+                decrease: [
+                    { name: "Winter Clothing", change: "-35%" },
+                    { name: "Hot Beverages", change: "-22%" }
+                ],
+                special: [
+                    { name: "Portable Fans", note: "Create endcap display" },
+                    { name: "Electrolyte Drinks", note: "Order 2x normal stock" }
+                ],
+                chartData: {
+                    labels: ["AC Units", "Bottled Water", "Sunscreen", "Fans", "Winter Clothes"],
+                    values: [65, 55, 48, 40, -35]
+                }
+            },
+            "Toronto": {
+                weather: "Snowstorm warning with 30cm accumulation expected",
+                increase: [
+                    { name: "Snow Shovels", change: "+80%" },
+                    { name: "Winter Tires", change: "+65%" },
+                    { name: "Blankets", change: "+45%" }
+                ],
+                decrease: [
+                    { name: "Gardening Supplies", change: "-40%" },
+                    { name: "Summer Sports", change: "-30%" }
+                ],
+                special: [
+                    { name: "Rock Salt", note: "Limit 2 per customer" },
+                    { name: "Portable Heaters", note: "Priority shipment needed" }
+                ],
+                chartData: {
+                    labels: ["Snow Shovels", "Winter Tires", "Blankets", "Rock Salt", "Gardening"],
+                    values: [80, 65, 45, 35, -40]
+                }
+            },
+            "Miami": {
+                weather: "Hurricane warning with heavy winds and rain",
+                increase: [
+                    { name: "Batteries", change: "+120%" },
+                    { name: "Canned Food", change: "+90%" },
+                    { name: "Flashlights", change: "+85%" }
+                ],
+                decrease: [
+                    { name: "Luxury Items", change: "-60%" },
+                    { name: "Outdoor Furniture", change: "-45%" }
+                ],
+                special: [
+                    { name: "Generators", note: "Implement waiting list" },
+                    { name: "Plywood", note: "Partner with local hardware stores" }
+                ],
+                chartData: {
+                    labels: ["Batteries", "Canned Food", "Flashlights", "Generators", "Luxury Items"],
+                    values: [120, 90, 85, 75, -60]
+                }
+            }
+        };
+
+        // Analyze button handler
+        document.getElementById('demo-analyze-btn').addEventListener('click', function() {
+            const location = document.getElementById('demo-location-input').value.trim();
+            if (location) {
+                analyzeLocation(location);
+            }
+        });
+
+        // Preset button handlers
+        document.querySelectorAll('.preset-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const location = this.getAttribute('data-location');
+                document.getElementById('demo-location-input').value = location;
+                analyzeLocation(location);
+            });
+        });
+
+        // Location analysis function
+        function analyzeLocation(location) {
+            // In a real app, this would call an API
+            // For demo, we'll use our sample data or randomize if unknown location
+            const data = locationData[location] || generateRandomData(location);
+            
+            // Update weather info
+            document.getElementById('weather-details').innerHTML = `
+                <p><strong>${location} Weather Forecast:</strong> ${data.weather}</p>
+                <p>Time Horizon: ${document.getElementById('time-horizon').value} days</p>
+            `;
+            
+            // Update chart
+            weatherChart.data.labels = data.chartData.labels;
+            weatherChart.data.datasets[0].data = data.chartData.values;
+            weatherChart.update();
+            
+            // Update results
+            document.getElementById('results-intro').style.display = 'none';
+            document.getElementById('results-grid').style.display = 'grid';
+            
+            const increaseList = document.getElementById('increase-items');
+            increaseList.innerHTML = data.increase.map(item => 
+                `<li><strong>${item.name}</strong>: ${item.change}</li>`
+            ).join('');
+            
+            const decreaseList = document.getElementById('decrease-items');
+            decreaseList.innerHTML = data.decrease.map(item => 
+                `<li><strong>${item.name}</strong>: ${item.change}</li>`
+            ).join('');
+            
+            const specialList = document.getElementById('special-items');
+            specialList.innerHTML = data.special.map(item => 
+                `<li><strong>${item.name}</strong>: ${item.note}</li>`
+            ).join('');
+        }
+
+        // Generate random data for unknown locations
+        function generateRandomData(location) {
+            const weatherTypes = [
+                "Heatwave expected with temperatures 10°C above average",
+                "Unseasonal rains forecast for the region",
+                "Cold snap warning with freezing temperatures",
+                "Mild weather expected with seasonal norms"
+            ];
+            
+            const products = {
+                increase: ["Umbrellas", "Sunscreen", "Winter Coats", "Air Conditioners", "Hot Chocolate"],
+                decrease: ["Swimwear", "Snow Shovels", "Sunglasses", "Heaters"],
+                special: ["Seasonal Promotional Items", "Local Specialty Products"]
+            };
+            
+            const weather = weatherTypes[Math.floor(Math.random() * weatherTypes.length)];
+            
+            return {
+                weather: weather,
+                increase: [
+                    { name: products.increase[Math.floor(Math.random() * products.increase.length)], change: `+${Math.floor(Math.random() * 50) + 20}%` },
+                    { name: products.increase[Math.floor(Math.random() * products.increase.length)], change: `+${Math.floor(Math.random() * 40) + 15}%` }
+                ],
+                decrease: [
+                    { name: products.decrease[Math.floor(Math.random() * products.decrease.length)], change: `-${Math.floor(Math.random() * 30) + 10}%` }
+                ],
+                special: [
+                    { name: products.special[0], note: "Create featured display" }
+                ],
+                chartData: {
+                    labels: ["Product A", "Product B", "Product C", "Product D"],
+                    values: [
+                        Math.floor(Math.random() * 50) + 20,
+                        Math.floor(Math.random() * 40) + 15,
+                        Math.floor(Math.random() * 30) + 10,
+                        -(Math.floor(Math.random() * 30) + 10)
+                    ]
+                }
+            };
+        }
+
+        // Initialize with Delhi data
+        setTimeout(() => {
+            document.getElementById('demo-location-input').value = 'Delhi';
+            analyzeLocation('Delhi');
+        }, 500);
+    </script>
+</body>
+</html>

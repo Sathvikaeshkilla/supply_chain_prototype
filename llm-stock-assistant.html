@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LLM Stock Assistant | Walmart Chain Brain</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --walmart-blue: #0071ce;
+            --walmart-yellow: #ffc220;
+            --dark-blue: #004c91;
+            --light-gray: #f5f5f5;
+            --dark-gray: #333;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+        
+        body {
+            background-color: var(--light-gray);
+            color: var(--dark-gray);
+        }
+        
+        header {
+            background-color: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 1rem 5%;
+        }
+        
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 5%;
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+        
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .walmart-logo {
+            height: 40px;
+        }
+        
+        .chain-brain-logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--walmart-blue);
+            position: relative;
+        }
+        
+        .chain-brain-logo::after {
+            content: "AI";
+            position: absolute;
+            top: -10px;
+            right: -25px;
+            font-size: 0.8rem;
+            background-color: var(--walmart-yellow);
+            color: var(--dark-blue);
+            padding: 2px 5px;
+            border-radius: 3px;
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+        }
+        
+        .nav-links a {
+            text-decoration: none;
+            color: var(--dark-gray);
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+        
+        .nav-links a:hover {
+            color: var(--walmart-blue);
+        }
+        
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+        
+        .demo-container {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 5%;
+        }
+        
+        .demo-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+        
+        .demo-header h1 {
+            font-size: 2.5rem;
+            color: var(--dark-blue);
+            margin-bottom: 1rem;
+        }
+        
+        .demo-header p {
+            font-size: 1.1rem;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+        
+        .llm-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+        
+        .llm-controls {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+        
+        .control-group {
+            margin-bottom: 2rem;
+        }
+        
+        .control-group h3 {
+            margin-bottom: 1rem;
+            color: var(--dark-blue);
+        }
+        
+        .input-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .input-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+        
+        .input-group input, .input-group select, .input-group textarea {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+        
+        .input-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+        
+        .analyze-btn {
+            background-color: var(--walmart-blue);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: background-color 0.3s;
+            width: 100%;
+        }
+        
+        .analyze-btn:hover {
+            background-color: var(--dark-blue);
+        }
+        
+        .llm-visualization {
+            height: 500px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            padding: 1rem;
+        }
+        
+        #llm-chart {
+            width: 100%;
+            height: 100%;
+        }
+        
+        .results-section {
+            margin-top: 3rem;
+            background-color: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+        
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+        
+        .result-card {
+            border-left: 4px solid var(--walmart-blue);
+            padding: 1rem;
+            background-color: var(--light-gray);
+        }
+        
+        .result-card h4 {
+            margin-bottom: 0.5rem;
+            color: var(--dark-blue);
+        }
+        
+        .ai-response {
+            background-color: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 5px;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .ai-response h5 {
+            color: var(--walmart-blue);
+            margin-bottom: 0.5rem;
+        }
+        
+        .back-btn {
+            display: inline-block;
+            margin-top: 2rem;
+            background-color: var(--walmart-blue);
+            color: white;
+            padding: 0.8rem 2rem;
+            border-radius: 5px;
+            text-decoration: none;
+            transition: background-color 0.3s;
+        }
+        
+        .back-btn:hover {
+            background-color: var(--dark-blue);
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 2rem;
+        }
+        
+        .loading::after {
+            content: '';
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid var(--walmart-blue);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        @media (max-width: 768px) {
+            .nav-links {
+                position: fixed;
+                top: 80px;
+                left: 0;
+                width: 100%;
+                background-color: white;
+                flex-direction: column;
+                align-items: center;
+                padding: 2rem 0;
+                gap: 1.5rem;
+                box-shadow: 0 10px 15px rgba(0,0,0,0.1);
+                transform: translateY(-150%);
+                transition: transform 0.3s ease;
+                z-index: 99;
+            }
+            
+            .nav-links.show {
+                transform: translateY(0);
+            }
+            
+            .mobile-menu-btn {
+                display: block;
+            }
+            
+            .llm-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .demo-header h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav class="navbar">
+            <div class="logo-container">
+                <img src="https://i.imgur.com/Jgq1XyN.png" alt="Walmart Logo" class="walmart-logo">
+                <span class="chain-brain-logo">Chain Brain</span>
+            </div>
+            <div class="nav-links">
+                <a href="index.html">Home</a>
+                <a href="weather-demo.html">Weather Forecast</a>
+                <a href="peerswap-demo.html">PeerSwap</a>
+                <a href="llm-stock-assistant.html">LLM Stock Assistant</a>
+                <a href="return-flow-optimization.html">Return Flow</a>
+            </div>
+            <button class="mobile-menu-btn">☰</button>
+        </nav>
+    </header>
+
+    <div class="demo-container">
+        <div class="demo-header">
+            <h1>LLM Stock Assistant</h1>
+            <p>AI-powered stock analysis and recommendations using advanced language models to optimize inventory decisions and predict market trends.</p>
+        </div>
+
+        <div class="llm-grid">
+            <div class="llm-controls">
+                <div class="control-group">
+                    <h3>Stock Analysis Parameters</h3>
+                    <div class="input-group">
+                        <label for="product-category">Product Category</label>
+                        <select id="product-category">
+                            <option value="electronics">Electronics</option>
+                            <option value="clothing">Clothing & Apparel</option>
+                            <option value="groceries">Groceries</option>
+                            <option value="home">Home & Garden</option>
+                            <option value="sports">Sports & Outdoors</option>
+                            <option value="beauty">Beauty & Personal Care</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label for="analysis-type">Analysis Type</label>
+                        <select id="analysis-type">
+                            <option value="demand-forecast">Demand Forecasting</option>
+                            <option value="trend-analysis">Trend Analysis</option>
+                            <option value="seasonal-patterns">Seasonal Patterns</option>
+                            <option value="market-sentiment">Market Sentiment</option>
+                            <option value="competitor-analysis">Competitor Analysis</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label for="time-horizon">Time Horizon (days)</label>
+                        <input type="number" id="time-horizon" value="30" min="7" max="365">
+                    </div>
+                    <div class="input-group">
+                        <label for="custom-query">Custom Query (Optional)</label>
+                        <textarea id="custom-query" placeholder="Ask specific questions about stock levels, trends, or recommendations..."></textarea>
+                    </div>
+                    <button id="analyze-btn" class="analyze-btn">Analyze with AI</button>
+                </div>
+            </div>
+
+            <div class="llm-visualization">
+                <canvas id="llm-chart"></canvas>
+            </div>
+        </div>
+
+        <div class="results-section" id="results-section" style="display: none;">
+            <h3>AI Analysis Results</h3>
+            <div class="loading" id="loading">
+                Analyzing with AI...
+            </div>
+            <div class="results-grid" id="results-grid">
+                <div class="result-card">
+                    <h4>Demand Forecast</h4>
+                    <div id="demand-forecast"></div>
+                </div>
+                <div class="result-card">
+                    <h4>Trend Analysis</h4>
+                    <div id="trend-analysis"></div>
+                </div>
+                <div class="result-card">
+                    <h4>Recommendations</h4>
+                    <div id="recommendations"></div>
+                </div>
+            </div>
+            <div class="ai-response" id="ai-response">
+                <h5>AI Assistant Response</h5>
+                <div id="ai-message"></div>
+            </div>
+        </div>
+
+        <a href="index.html" class="back-btn">← Back to Home</a>
+    </div>
+
+    <script>
+        // Initialize chart
+        const ctx = document.getElementById('llm-chart').getContext('2d');
+        const llmChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
+                datasets: [{
+                    label: 'Predicted Demand',
+                    data: [0, 0, 0, 0],
+                    borderColor: 'rgb(0, 113, 206)',
+                    backgroundColor: 'rgba(0, 113, 206, 0.1)',
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'AI Demand Prediction'
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+
+        // Sample AI analysis data
+        const analysisData = {
+            "electronics": {
+                demandForecast: "Expected 15% increase in demand for smartphones and laptops due to back-to-school season",
+                trendAnalysis: "Strong upward trend in wireless earbuds and smart home devices",
+                recommendations: "Increase stock levels by 20% for premium electronics, focus on mobile accessories",
+                chartData: [120, 135, 150, 165]
+            },
+            "clothing": {
+                demandForecast: "Seasonal transition driving 25% increase in fall clothing demand",
+                trendAnalysis: "Sustainable fashion and athleisure continue strong growth",
+                recommendations: "Stock up on denim and outerwear, reduce summer inventory",
+                chartData: [100, 125, 150, 175]
+            },
+            "groceries": {
+                demandForecast: "Organic and healthy food demand up 30% year-over-year",
+                trendAnalysis: "Plant-based alternatives and meal prep kits trending",
+                recommendations: "Expand organic section, increase fresh produce variety",
+                chartData: [90, 110, 130, 150]
+            },
+            "home": {
+                demandForecast: "Home improvement projects driving 18% increase in DIY supplies",
+                trendAnalysis: "Smart home integration and sustainable materials popular",
+                recommendations: "Focus on smart home devices and eco-friendly products",
+                chartData: [85, 100, 115, 130]
+            },
+            "sports": {
+                demandForecast: "Fitness equipment demand stable with 12% growth in outdoor gear",
+                trendAnalysis: "Home fitness and outdoor activities remain strong",
+                recommendations: "Maintain fitness equipment stock, expand outdoor section",
+                chartData: [95, 105, 115, 125]
+            },
+            "beauty": {
+                demandForecast: "Skincare and clean beauty products up 22% in demand",
+                trendAnalysis: "Sustainable packaging and natural ingredients trending",
+                recommendations: "Increase clean beauty inventory, focus on premium skincare",
+                chartData: [110, 125, 140, 155]
+            }
+        };
+
+        // Analyze button handler
+        document.getElementById('analyze-btn').addEventListener('click', function() {
+            const category = document.getElementById('product-category').value;
+            const analysisType = document.getElementById('analysis-type').value;
+            const timeHorizon = document.getElementById('time-horizon').value;
+            const customQuery = document.getElementById('custom-query').value;
+
+            // Show loading
+            document.getElementById('results-section').style.display = 'block';
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('results-grid').style.display = 'none';
+
+            // Simulate AI processing
+            setTimeout(() => {
+                performAnalysis(category, analysisType, timeHorizon, customQuery);
+            }, 2000);
+        });
+
+        function performAnalysis(category, analysisType, timeHorizon, customQuery) {
+            const data = analysisData[category] || generateRandomAnalysis(category);
+            
+            // Update chart
+            llmChart.data.datasets[0].data = data.chartData;
+            llmChart.update();
+
+            // Update results
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('results-grid').style.display = 'grid';
+
+            document.getElementById('demand-forecast').innerHTML = `
+                <p><strong>${data.demandForecast}</strong></p>
+                <p>Time Horizon: ${timeHorizon} days</p>
+            `;
+
+            document.getElementById('trend-analysis').innerHTML = `
+                <p><strong>${data.trendAnalysis}</strong></p>
+                <p>Analysis Type: ${analysisType.replace('-', ' ')}</p>
+            `;
+
+            document.getElementById('recommendations').innerHTML = `
+                <p><strong>${data.recommendations}</strong></p>
+                <p>Category: ${category.charAt(0).toUpperCase() + category.slice(1)}</p>
+            `;
+
+            // Generate AI response
+            let aiMessage = `Based on my analysis of ${category} products over ${timeHorizon} days, `;
+            aiMessage += data.demandForecast.toLowerCase() + ' ';
+            aiMessage += data.trendAnalysis.toLowerCase() + ' ';
+            aiMessage += `My recommendation is to ${data.recommendations.toLowerCase()}`;
+            
+            if (customQuery) {
+                aiMessage += `\n\nRegarding your specific query: "${customQuery}" - I've incorporated this into my analysis and the recommendations above reflect your specific concerns.`;
+            }
+
+            document.getElementById('ai-message').innerHTML = aiMessage.replace(/\n/g, '<br>');
+        }
+
+        function generateRandomAnalysis(category) {
+            const trends = [
+                "Strong upward trend with seasonal variations",
+                "Stable growth with emerging market opportunities",
+                "Volatile demand requiring careful inventory management",
+                "Steady increase with premium segment growth"
+            ];
+
+            const forecasts = [
+                `Expected ${Math.floor(Math.random() * 30) + 10}% increase in demand for ${category} products`,
+                `Moderate growth of ${Math.floor(Math.random() * 20) + 5}% expected in ${category} category`,
+                `Stable demand with ${Math.floor(Math.random() * 15) + 5}% growth in premium ${category}`,
+                `Seasonal fluctuations expected with ${Math.floor(Math.random() * 25) + 10}% peak demand`
+            ];
+
+            const recommendations = [
+                `Increase stock levels by ${Math.floor(Math.random() * 30) + 10}% for ${category}`,
+                `Focus on premium ${category} products and expand variety`,
+                `Optimize inventory mix with ${Math.floor(Math.random() * 20) + 10}% more stock`,
+                `Maintain current levels but increase premium ${category} selection`
+            ];
+
+            return {
+                demandForecast: forecasts[Math.floor(Math.random() * forecasts.length)],
+                trendAnalysis: trends[Math.floor(Math.random() * trends.length)],
+                recommendations: recommendations[Math.floor(Math.random() * recommendations.length)],
+                chartData: [
+                    Math.floor(Math.random() * 50) + 80,
+                    Math.floor(Math.random() * 50) + 90,
+                    Math.floor(Math.random() * 50) + 100,
+                    Math.floor(Math.random() * 50) + 110
+                ]
+            };
+        }
+
+        // Mobile menu toggle
+        document.querySelector('.mobile-menu-btn').addEventListener('click', function() {
+            document.querySelector('.nav-links').classList.toggle('show');
+        });
+    </script>
+</body>
+</html> 
